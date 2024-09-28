@@ -35,7 +35,7 @@ pipeline {
                         error("Critical vulnerabilities found! Failing the build.")
                     }
                 }
-                echo ' Security Scan Completed'
+                echo 'Security Scan Completed'
             }
         }
 
@@ -50,10 +50,12 @@ pipeline {
     }
     post {
         always {
-            script {
-                archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+            node {
+                script {
+                    archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+                    echo 'Pipeline completed. Artifacts archived.'
+                }
             }
-            echo 'Pipeline completed.'
         }
         failure {
             echo 'Pipeline failed. Check logs and reports for details.'
