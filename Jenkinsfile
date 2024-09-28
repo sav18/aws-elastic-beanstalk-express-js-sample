@@ -36,10 +36,10 @@ pipeline {
     }
     post {
         failure {
-            echo 'Build failed due to critical vulnerabilities or other errors. Halting pipeline.' // Message on failure
+            echo 'Build failed due to critical vulnerabilities or other errors. Halting pipeline.' 
         }
         success {
-            echo 'Pipeline completed successfully!' // Message on success
+            echo 'Pipeline completed successfully!' 
         }
     }
 }
