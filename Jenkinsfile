@@ -13,66 +13,73 @@ pipeline {
         stage('Install Dependencies') { 
             steps {
                 sh 'npm install'
-                sh 'npm install -g snyk'
                 echo 'Dependencies installed successfully!'
-              
             }
+        }
 
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                sh 'npm run build' 
+                sh 'npm run build'
                 echo 'Build completed successfully!' 
             }
         }
         
-        stage('Snyk Security Scan Phase') {
+        stage('Snyk Security Scan') {
             steps {
-                 script {
+                script {
+                    echo 'Starting Snyk Security Scan...'
+
                     def snykResults = sh(script: './node_modules/.bin/snyk test --json', returnStdout: true)
                     def jsonResults = readJSON(text: snykResults)
+                    
+                    writeFile file: 'snyk-report.json', text: snykResults
+                    archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: false
+                    
                     if (jsonResults.vulnerabilities.any { it.severity == 'critical' }) {
-                        error("Vulnerabilities found! Check snyk-report.json.")
+                        error("Critical vulnerabilities found! Failing the build.")
                     } else {
-                        writeFile file: 'snyk-report.json', text: snykResults
+                        echo 'No critical vulnerabilities found. Proceeding...'
                     }
                 }
-
-                echo ' Security Scan Completed'
             }
             post {
                 success {
-                    echo ' Security Scan passed!'
+                    echo 'Snyk Security Scan completed successfully!'
                 }
                 failure {
-                    echo 'Failed.'
+                    echo 'Snyk Security Scan failed due to critical vulnerabilities.'
                 }
             }
         }
-
 
         stage('Test Phase') {
             steps {
-                script {
-                    sh 'npm test'
-                    echo 'Tests completed.'
-                }
+                echo 'Running tests...'
+                sh 'npm test'
+                echo 'Tests completed successfully.'
             }
             post {
                 success {
-                    echo 'Tests passed!'
+                    echo 'All tests passed!'
                 }
                 failure {
-                    echo 'Some tests failed. Check logs for details.'
+                    echo 'Some tests failed. Please check the logs for details.'
                 }
             }
         }
     }
-          
-   
+    
+    post {
+        always {
+            echo 'Archiving Snyk vulnerability scan report...'
+            archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+        }
         success {
-            echo 'Pipeline completed successfully!' 
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check logs and reports for details.'
         }
     }
 }
-
