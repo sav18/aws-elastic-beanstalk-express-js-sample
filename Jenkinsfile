@@ -6,7 +6,7 @@ pipeline {
         }
     }
     environment {
-        SNYK_TOKEN = credentials('snyk-api-token') 
+        SNYK_TOKEN = credentials('6ec59578-9b80-4981-af86-f0c4336d2b34') 
     }
     stages {
         
