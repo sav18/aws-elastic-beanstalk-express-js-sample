@@ -34,7 +34,6 @@ pipeline {
                     def jsonResults = readJSON(text: snykResults)
                     
                     writeFile file: 'snyk-report.json', text: snykResults
-                    archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: false
                     
                     if (jsonResults.vulnerabilities.any { it.severity == 'critical' }) {
                         error("Critical vulnerabilities found! Failing the build.")
@@ -72,14 +71,18 @@ pipeline {
     
     post {
         always {
-            echo 'Archiving Snyk vulnerability scan report...'
-            archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+            script {
+                node {
+                    echo 'Archiving Snyk vulnerability scan report...'
+                    archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+                }
+            }
         }
         success {
             echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Please check logs and reports for details.'
+            echo 'Pipeline failed.'
         }
     }
 }
