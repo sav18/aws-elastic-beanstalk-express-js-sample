@@ -50,17 +50,7 @@ pipeline {
     }
     post {
         always {
-            script {
-               archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
-               echo 'Pipeline completed. Artifacts archived.'
-            }
-        }
-    
-        failure {
-            echo 'Pipeline failed. Check logs and reports for details.'
-        }
-        success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline Completed.'
         }
     }
 }    
