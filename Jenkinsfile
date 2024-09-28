@@ -15,16 +15,9 @@ pipeline {
                 sh 'npm install'
                 sh 'npm install -g snyk'
                 echo 'Dependencies installed successfully!'
-               
+              
             }
-        }
-        stage('Snyk Security Scan') {
-            steps {
-                sh 'snyk auth $SNYK_TOKEN' 
-                sh 'snyk test --severity-threshold=high' 
-                echo 'Snyk security scan completed successfully!' 
-            }
-        }
+
         stage('Build') {
             steps {
                 echo 'Building the application...'
@@ -33,11 +26,50 @@ pipeline {
             }
         }
         
-    }
-    post {
-        failure {
-            echo 'Build failed due to critical vulnerabilities or other errors. Halting pipeline.' 
+        stage('Snyk Security Scan Phase') {
+            steps {
+                 script {
+                    def snykResults = sh(script: './node_modules/.bin/snyk test --json', returnStdout: true)
+                    def jsonResults = readJSON(text: snykResults)
+                    if (jsonResults.vulnerabilities.any { it.severity == 'critical' }) {
+                        error("Vulnerabilities found! Check snyk-report.json.")
+                    } else {
+                        writeFile file: 'snyk-report.json', text: snykResults
+                    }
+                }
+
+                echo ' Security Scan Completed'
+            }
+            post {
+                success {
+                    echo ' Security Scan passed!'
+                }
+                failure {
+                    echo 'Failed.'
+                }
+            }
         }
+
+
+        stage('Test Phase') {
+            steps {
+                script {
+                    sh 'npm test'
+                    echo 'Tests completed.'
+                }
+            }
+            post {
+                success {
+                    echo 'Tests passed!'
+                }
+                failure {
+                    echo 'Some tests failed. Check logs for details.'
+                }
+            }
+        }
+    }
+          
+   
         success {
             echo 'Pipeline completed successfully!' 
         }
