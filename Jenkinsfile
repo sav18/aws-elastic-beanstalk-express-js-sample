@@ -48,15 +48,15 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            node {
-                script {
-                    archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
-                    echo 'Pipeline completed. Artifacts archived.'
-                }
-            }
-        }
+    // post {
+    //     always {
+    //         node {
+    //             script {
+    //                 archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
+    //                 echo 'Pipeline completed. Artifacts archived.'
+    //             }
+    //         }
+    //     }
         failure {
             echo 'Pipeline failed. Check logs and reports for details.'
         }
