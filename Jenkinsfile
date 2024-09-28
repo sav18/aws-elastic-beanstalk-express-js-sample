@@ -8,10 +8,10 @@ pipeline {
     stages {
         stage(' Install Dependencies ') {
             steps {
-                sh 'npm install --save'
+                sh 'npm install'
                 echo 'Installing  Complete'
 
-                sh 'npm install snyk --save-dev'
+                sh 'npm install snyk'
                 echo 'Snyk Installation completed'
 
                 withCredentials([string(credentialsId: 'snyk_token', variable: 'SNYK_TOKEN')]) {
