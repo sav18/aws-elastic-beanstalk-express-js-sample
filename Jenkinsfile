@@ -48,7 +48,7 @@ pipeline {
             }
         }
     }
-    // post {
+    post {
     //     always {
     //         node {
     //             script {
@@ -64,4 +64,4 @@ pipeline {
             echo 'Pipeline completed successfully!'
         }
     }
-
+}    
